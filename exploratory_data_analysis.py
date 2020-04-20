@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -48,7 +49,7 @@ def construct_ecdf(ax, data, title=""):
 
 
 def analyze_response_times():
-    data = pd.read_csv("FDNY_Monthly_Response_Times.csv")
+    data = pd.read_csv(os.path.join("data", "FDNY_Monthly_Response_Times.csv"))
 
     plt.style.use('Solarize_Light2')
     font = {'family': 'normal',
@@ -92,7 +93,5 @@ def analyze_response_times():
 def main():
     analyze_response_times()
 
-    firehouses = pd.read_csv("FDNY_Firehouse_Listing.csv")
-    # print(firehouses)
 
 main()
