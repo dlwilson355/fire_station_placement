@@ -1,3 +1,5 @@
+"""This file provides functionality for interacting with the Simulation of Urban Mobility."""
+
 import os
 import sys
 import random
@@ -14,19 +16,24 @@ import traci
 import sumolib
 
 
-def get_response_times(station_coordinates, num_simulations=10):
+def get_response_times(config_file_path,
+                       net_file_path,
+                       station_coordinates,
+                       num_simulations=10,
+                       gui=False,
+                       auto_start_close=False):
     """This function will run multiple simulations in SUMO and return the resulting response times."""
 
     response_times = []
     for _ in range(num_simulations):
-        start_simulation()
-        response_times.append(respond_to_emergency(station_coordinates))
+        start_simulation(config_file_path, gui, auto_start_close)
+        response_times.append(respond_to_emergency(net_file_path, station_coordinates))
         close_simulation()
 
     return response_times
 
 
-def start_simulation(gui=False, auto_start_close=True):
+def start_simulation(config_file_path, gui=False, auto_start_close=True):
     """Starts a simulation in SUMO."""
 
     # this absolute file path must point to where SUMO is installed, there is no way around this
@@ -36,39 +43,55 @@ def start_simulation(gui=False, auto_start_close=True):
         sumo_file_path = r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo.exe"
 
     # construct the sumo command
-    config_file_path = r"D:\burlington.sumocfg"
     sumo_command = [sumo_file_path, "-c", config_file_path]
     if auto_start_close:
         sumo_command.append('--start')
         sumo_command.append('--quit-on-end')
 
+    # give fire tucks a blue light device
+    sumo_command.append('--device.bluelight.explicit=fire_truck')
+
     # call the command to start the simulation
     traci.start(sumo_command)
 
 
-def respond_to_emergency(station_coordinates):
+def respond_to_emergency(net_file_path, station_coordinates, prior_time=400):
     """
     This function creates an emergency, finds the nearest station, and sends the emergency vehicle.
     It returns the amount of time (in seconds) it takes for the emergency vehicle to arrive on scene.
     """
 
     # find the edges of the source and destination
-    emergency_edge, emergency_lat, emergency_lon = get_emergency()
+    emergency_edge, emergency_lat, emergency_lon = get_emergency(net_file_path)
     station_coordinate = get_closest_station(station_coordinates, (emergency_lat, emergency_lon))
-    station_edge = get_edge_id_from_gps(station_coordinate)
+    station_edge = get_edge_id_from_gps(net_file_path, station_coordinate)
+
+    # run the simulation a little to allow traffic to flow
+    while traci.simulation.getTime() < prior_time:
+        traci.simulationStep()
 
     # create the emergency vehicle and send it from the source to the destination
     traci.route.add("trip", [station_edge, emergency_edge])
     traci.vehicle.add("fire_truck", "trip")
     traci.vehicle.setVehicleClass("fire_truck", "emergency")
+    traci.vehicle.setSpeedFactor("fire_truck", 1.5)
+    traci.vehicle.setSpeedMode("fire_truck", 0)
     traci.vehicle.setColor("fire_truck", (255, 0, 0, 255))
+    traci.vehicle.setShapeClass("fire_truck", "truck")
+    # print("parameter")
+    # print(traci.vehicle.getParameter("fire_truck", "device.bluelight.requestBLUELIGHT"))
+    # input("enter")
 
     # track how long the emergency vehicle takes to arrive on scene
     while 'fire_truck' not in traci.simulation.getArrivedIDList():
         traci.simulationStep()
-    arrival_time = traci.simulation.getTime()
 
-    return arrival_time
+    # compute the response time
+    preparation_time = 75
+    travel_time = traci.simulation.getTime() - prior_time
+    response_time = preparation_time + travel_time
+
+    return response_time
 
 
 def close_simulation():
@@ -77,31 +100,30 @@ def close_simulation():
     traci.close()
 
 
-def get_emergency():
-    net_file_path = r"sumo\osm.net.xml"
+def get_emergency(net_file_path):
+    """Returns the edgeID and GPS coordinates of an emergency."""
+
     net = sumolib.net.readNet(net_file_path)
 
     # find a valid edge for emergency vehicle
     edge = None
     while not edge:
-        edge_ID = random.choice(traci.edge.getIDList())
-        if net.hasEdge(edge_ID):
-            edge = net.getEdge(edge_ID)
-            if not edge.allows("emergency"):
-                edge = None
+        edge = random.choice(net.getEdges())
+        if not edge.allows("emergency"):
+            edge = None
 
-    edge = net.getEdge(edge_ID)
+    # get the ID, lat, and lon
+    edge_ID = edge.getID()
     x, y, _, _ = edge.getBoundingBox()
     lon, lat = net.convertXY2LonLat(x, y)
 
     return edge_ID, lat, lon
 
 
-def get_edge_id_from_gps(coordinate, search_radius=100):
+def get_edge_id_from_gps(net_file_path, coordinate, search_radius=10000):
     """Returns the nearest edge to the passed coordinates that the emergency vehicle can depart from."""
 
     # get a list of nearby edges
-    net_file_path = r"sumo\osm.net.xml"
     latitude, longitude = coordinate
     net = sumolib.net.readNet(net_file_path)
     x, y = net.convertLonLat2XY(longitude, latitude)
@@ -140,14 +162,17 @@ def get_closest_station(station_coordinates, emergency_coordinate):
 
 
 def main():
-
+    config_file_path = r"D:\burlington.sumocfg"
+    net_file_path = r"sumo\osm.net.xml"
     station_coordinates = [(44.485567, -73.222804), (44.476561, -73.210535), (44.466561, -73.210535), (44.478, -73.213), (44.476, -73.205)]
     # station_coordinates = [(44.476561, -73.210535)]
-    response_times = get_response_times(station_coordinates)
+
+    response_times = get_response_times(config_file_path, net_file_path, station_coordinates)
     # print(f"Response time was {response_time} seconds")
 
     print(response_times)
     print(sum(response_times) / len(response_times))
 
 
-main()
+if __name__ == "__main__":
+    main()

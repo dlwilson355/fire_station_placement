@@ -13,7 +13,7 @@ def get_seconds(s):
 
 
 def print_summary_statistics(data):
-    data = data.apply(get_seconds)
+    # data = data.apply(get_seconds)
 
     min_val = min(data)
     max_val = max(data)
@@ -39,7 +39,7 @@ def construct_histogram(ax, data, title=""):
 
 
 def construct_ecdf(ax, data, title=""):
-    data = data.apply(get_seconds)
+    # data = data.apply(get_seconds)
     data = data.sort_values()
     p = [i/data.shape[0] for i in range(data.shape[0])]
     ax.plot(data, p)
@@ -94,4 +94,5 @@ def main():
     analyze_response_times()
 
 
-main()
+if __name__ == "__main__":
+    main()
