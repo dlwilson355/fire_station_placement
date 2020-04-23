@@ -4,71 +4,45 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from sumo_interface import get_response_times
-from exploratory_data_analysis import print_summary_statistics, construct_ecdf, get_seconds
-from optimization import load_station_coordinates
-
-
-def get_real_world_response_times():
-    data = pd.read_csv(os.path.join("data", "FDNY_Monthly_Response_Times.csv"))
-    data["AVERAGERESPONSETIME"] = data["AVERAGERESPONSETIME"].apply(get_seconds)
-
-    return data["AVERAGERESPONSETIME"]
+from exploratory_data_analysis import compute_summary_statistics, get_ECDF_values, load_nyc_response_time_dataset
+from optimization import load_nyc_station_coordinates
 
 
 def get_simulated_response_times(num_simulations=10):
     directory = "staten_island_south_west"
-    config_file_path = os.path.join(directory, "osm.sumocfg")
-    net_file_path = os.path.join(directory, "osm.net.xml")
-    station_coordinates = load_station_coordinates()
-    simulated_response_times = get_response_times(config_file_path, net_file_path, station_coordinates, num_simulations)
+    station_coordinates = load_nyc_station_coordinates()
+    simulated_response_times = get_response_times(directory, station_coordinates, num_simulations)
 
     return simulated_response_times
 
 
-def ecdf(real_response_times, simulated_response_times):
+def analyze_relationship(real_response_times, simulated_response_times):
+    """
+    Constructs an ECDF and computes summary statistics analyzing the relationship between real and simulated response
+    times.
+    """
 
-    real_response_times = sorted(real_response_times)
-    simulated_response_times = sorted(simulated_response_times)
-
-    l_r = len(real_response_times)
-    l_s = len(simulated_response_times)
-
-    p_r = [i / l_r for i in range(l_r)]
-    p_s = [i / l_s for i in range(l_s)]
-
-    plt.plot(real_response_times, p_r)
-    plt.plot(simulated_response_times, p_s, '--')
+    # construct and ECDF
+    plt.style.use('Solarize_Light2')
+    font = {'weight': 'bold', 'size': 22}
+    plt.rc('font', **font)
+    plt.plot(*get_ECDF_values(real_response_times))
+    plt.plot(*get_ECDF_values(simulated_response_times), '--')
     plt.xlabel("Response Time (s)")
     plt.ylabel("Pr < X")
     plt.title("Real vs Simulated Response Times")
     plt.legend(["Real", "Simulated"])
-    plt.show()
+    plt.savefig(os.path.join("plots", "real_vs_simulated_response_times_ecdf.png"))
 
-
-def analyze_relationship(real_response_times, simulated_response_times):
-
-    print("Summary Statistics for real response times")
-    print_summary_statistics(real_response_times)
-    print("Summary Statistics for simulated response times")
-    print_summary_statistics(simulated_response_times)
-
-    plt.style.use('Solarize_Light2')
-    font = {'family': 'normal',
-            'weight': 'bold',
-            'size': 22}
-    plt.rc('font', **font)
-
-    ecdf(real_response_times, simulated_response_times)
+    # compute summary statistics
+    data_dict = {"Real": real_response_times, "Simulated": simulated_response_times}
+    print(data_dict)
+    compute_summary_statistics(data_dict, os.path.join("plots", "real_vs_simulated_response_times.txt"))
 
 
 def main():
-    real_response_times = list(get_real_world_response_times())
-    simulated_response_times = get_simulated_response_times(500)
-    print(real_response_times)
-    print(simulated_response_times)
-    # simulated_response_times = get_real_world_response_times()[10:20]
-    # print(real_response_times)
-    # print(simulated_response_times)
+    real_response_times = list(load_nyc_response_time_dataset()["AVERAGERESPONSETIME"])
+    simulated_response_times = get_response_times("staten_island_south_west", load_nyc_station_coordinates(), 5)
     analyze_relationship(real_response_times, simulated_response_times)
 
 

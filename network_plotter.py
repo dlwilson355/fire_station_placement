@@ -1,7 +1,11 @@
+"""This file generates plots of road networks."""
+# TODO: Improve this code.
+
 import os
 
 tools_dir = r'C:\Program Files (x86)\Eclipse\Sumo\tools\visualization'
 net_filepath = r'C:\Users\Daniel\OneDrive\Documents\School Work\Data Science 2\HW\fire_station_placement\staten_island_sample\osm.net.xml'
+output_file_path = os.path.join("plots", "road_speeds.png")
 
 command = f"python \"{os.path.join(tools_dir, 'plot_net_dump.py')}\" -v -n \"{net_filepath}\" " \
          f"--xticks 7000,14001,2000,16 " \
@@ -23,7 +27,7 @@ command = f"python \"{os.path.join(tools_dir, 'plot_net_speeds.py')}\" -n \"{net
           f"--xlim 1000,6000 " \
           f"--ylim 1000,4000 " \
           f"--edge-width .5 " \
-          f"-o speeds2.png " \
+          f"-o {output_file_path} " \
           f"--minV 0 --maxV 60 " \
           f"--xticks 16 --yticks 16 " \
           f"--colormap jet"

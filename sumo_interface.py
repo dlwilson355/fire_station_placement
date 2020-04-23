@@ -16,8 +16,7 @@ import traci
 import sumolib
 
 
-def get_response_times(config_file_path,
-                       net_file_path,
+def get_response_times(data_directory,
                        station_coordinates,
                        num_simulations=10,
                        gui=False,
@@ -25,6 +24,9 @@ def get_response_times(config_file_path,
     """This function will run multiple simulations in SUMO and return the resulting response times."""
 
     response_times = []
+    config_file_path = os.path.join(data_directory, 'osm.sumocfg')
+    net_file_path = os.path.join(data_directory, 'osm.net.xml')
+
     for _ in range(num_simulations):
         start_simulation(config_file_path, gui, auto_start_close)
         response_times.append(respond_to_emergency(net_file_path, station_coordinates))
@@ -47,9 +49,6 @@ def start_simulation(config_file_path, gui=False, auto_start_close=True):
     if auto_start_close:
         sumo_command.append('--start')
         sumo_command.append('--quit-on-end')
-
-    # give fire tucks a blue light device
-    sumo_command.append('--device.bluelight.explicit=fire_truck')
 
     # call the command to start the simulation
     traci.start(sumo_command)
@@ -78,9 +77,6 @@ def respond_to_emergency(net_file_path, station_coordinates, prior_time=400):
     traci.vehicle.setSpeedMode("fire_truck", 0)
     traci.vehicle.setColor("fire_truck", (255, 0, 0, 255))
     traci.vehicle.setShapeClass("fire_truck", "truck")
-    # print("parameter")
-    # print(traci.vehicle.getParameter("fire_truck", "device.bluelight.requestBLUELIGHT"))
-    # input("enter")
 
     # track how long the emergency vehicle takes to arrive on scene
     while 'fire_truck' not in traci.simulation.getArrivedIDList():
@@ -162,16 +158,19 @@ def get_closest_station(station_coordinates, emergency_coordinate):
 
 
 def main():
-    config_file_path = r"D:\burlington.sumocfg"
-    net_file_path = r"sumo\osm.net.xml"
-    station_coordinates = [(44.485567, -73.222804), (44.476561, -73.210535), (44.466561, -73.210535), (44.478, -73.213), (44.476, -73.205)]
-    # station_coordinates = [(44.476561, -73.210535)]
+    """Runs a small sample network with false department locations for experimentation."""
 
-    response_times = get_response_times(config_file_path, net_file_path, station_coordinates)
-    # print(f"Response time was {response_time} seconds")
+    data_directory = 'test_sim'
+    station_coordinates = [(44.485567, -73.222804),
+                           (44.476561, -73.210535),
+                           (44.466561, -73.210535),
+                           (44.478, -73.213),
+                           (44.476, -73.205)]
 
-    print(response_times)
-    print(sum(response_times) / len(response_times))
+    response_times = get_response_times(data_directory, station_coordinates)
+    mean_response_time = sum(response_times) / len(response_times)
+
+    print(f"Mean response time was: {mean_response_time} seconds.")
 
 
 if __name__ == "__main__":

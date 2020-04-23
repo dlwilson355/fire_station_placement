@@ -1,11 +1,13 @@
+"""This file contains code for optimizing the placement of fire stations."""
+
 import pandas as pd
 import os
 
 from sumo_interface import get_response_times
 
 
-def load_station_coordinates():
-    """This function returns """
+def load_nyc_station_coordinates():
+    """This function returns the coordinates of the New York fire stations as a list of (lat, lon) tuples."""
 
     stations = pd.read_csv(os.path.join("data", "FDNY_Firehouse_Listing.csv"))
     station_coordinates = []
@@ -19,10 +21,8 @@ def load_station_coordinates():
 
 def simulate():
     directory = "staten_island_south_west"
-    config_file_path = os.path.join(directory, "osm.sumocfg")
-    net_file_path = os.path.join(directory, "osm.net.xml")
-    station_coordinates = load_station_coordinates()
-    response_times = get_response_times(config_file_path, net_file_path, station_coordinates, gui=True)
+    station_coordinates = load_nyc_station_coordinates()
+    response_times = get_response_times(directory, station_coordinates, gui=True)
     print(response_times)
     print(sum(response_times) / len(response_times))
 
