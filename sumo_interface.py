@@ -38,11 +38,12 @@ def get_response_times(data_directory,
 def start_simulation(config_file_path, gui=False, auto_start_close=True):
     """Starts a simulation in SUMO."""
 
-    # this absolute file path must point to where SUMO is installed, there is no way around this
+    # find the SUMO file path
     if gui:
-        sumo_file_path = r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo-gui.exe"
+        sumo_executable = 'sumo-gui.exe'
     else:
-        sumo_file_path = r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo.exe"
+        sumo_executable = 'sumo.exe'
+    sumo_file_path = os.path.join(os.environ['SUMO_HOME'], 'bin', sumo_executable)
 
     # construct the sumo command
     sumo_command = [sumo_file_path, "-c", config_file_path]
