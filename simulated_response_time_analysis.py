@@ -5,7 +5,19 @@ import matplotlib.pyplot as plt
 
 from sumo_interface import get_response_times
 from exploratory_data_analysis import compute_summary_statistics, get_ECDF_values, load_nyc_response_time_dataset
-from optimization import load_nyc_station_coordinates
+
+
+def load_nyc_station_coordinates():
+    """This function returns the coordinates of the New York fire stations as a list of (lat, lon) tuples."""
+
+    stations = pd.read_csv(os.path.join("data", "FDNY_Firehouse_Listing.csv"))
+    station_coordinates = []
+    for i in range(stations.shape[0]):
+        latitude = stations['Latitude'].iloc[i]
+        longitude = stations['Longitude'].iloc[i]
+        station_coordinates.append((latitude, longitude))
+
+    return station_coordinates
 
 
 def get_simulated_response_times(num_simulations=10):
@@ -36,7 +48,6 @@ def analyze_relationship(real_response_times, simulated_response_times):
 
     # compute summary statistics
     data_dict = {"Real": real_response_times, "Simulated": simulated_response_times}
-    print(data_dict)
     compute_summary_statistics(data_dict, os.path.join("plots", "real_vs_simulated_response_times.txt"))
 
 

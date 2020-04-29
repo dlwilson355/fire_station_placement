@@ -11,7 +11,7 @@ if 'SUMO_HOME' in os.environ:
     sumo_tools_directory = os.path.join(os.environ['SUMO_HOME'], 'tools')
     sys.path.append(sumo_tools_directory)
 else:
-    raise ModuleNotFoundError("You must declare the environmental variable 'SUMO_HOME' to load the necessary packages.")
+    raise ModuleNotFoundError("Install SUMO and the environmental variable 'SUMO_HOME' will be automatically set.")
 import traci
 import sumolib
 
@@ -24,8 +24,8 @@ def get_response_times(data_directory,
     """This function will run multiple simulations in SUMO and return the resulting response times."""
 
     response_times = []
-    config_file_path = os.path.join(data_directory, 'osm.sumocfg')
-    net_file_path = os.path.join(data_directory, 'osm.net.xml')
+    config_file_path = get_config_file_path(data_directory)
+    net_file_path = get_network_file_path(data_directory)
 
     for _ in range(num_simulations):
         start_simulation(config_file_path, gui, auto_start_close)
@@ -97,10 +97,10 @@ def close_simulation():
     traci.close()
 
 
-def get_emergency(net_file_path):
+def get_emergency(network_file_path):
     """Returns the edgeID and GPS coordinates of an emergency."""
 
-    net = sumolib.net.readNet(net_file_path)
+    net = get_network(network_file_path)
 
     # find a valid edge for emergency vehicle
     edge = None
@@ -111,18 +111,17 @@ def get_emergency(net_file_path):
 
     # get the ID, lat, and lon
     edge_ID = edge.getID()
-    x, y, _, _ = edge.getBoundingBox()
-    lon, lat = net.convertXY2LonLat(x, y)
+    lon, lat = net.convertXY2LonLat(*edge.getToNode().getCoord())
 
     return edge_ID, lat, lon
 
 
-def get_edge_id_from_gps(net_file_path, coordinate, search_radius=10000):
+def get_edge_id_from_gps(network_file_path, coordinate, search_radius=1000):
     """Returns the nearest edge to the passed coordinates that the emergency vehicle can depart from."""
 
     # get a list of nearby edges
     latitude, longitude = coordinate
-    net = sumolib.net.readNet(net_file_path)
+    net = get_network(network_file_path)
     x, y = net.convertLonLat2XY(longitude, latitude)
     edges = net.getNeighboringEdges(x, y, search_radius)
 
@@ -132,7 +131,10 @@ def get_edge_id_from_gps(net_file_path, coordinate, search_radius=10000):
         if edge[0].allows("emergency"):
             return edge[0].getID()
 
-    raise ValueError(f"No edges within search radius:{search_radius} of coordinate:{coordinate} was found.")
+    raise ValueError(f"Found no edges within search radius {search_radius} of coordinate {coordinate} that support "
+                     f"emergency vehicles."
+                     f"\nCheck to make sure your coordinates are reasonable "
+                     f"and consider increasing the search radius.")
 
 
 def get_distance(coordinates_1, coordinates_2):
@@ -158,8 +160,39 @@ def get_closest_station(station_coordinates, emergency_coordinate):
     return station_coordinates[min_index]
 
 
+def get_network_coordinate_bounds(network_file_path):
+    """
+    Returns a tuple containing two coordinates where each coordinate is a (lat, lon) representing the bounds of the
+    network.
+    """
+
+    net = get_network(network_file_path)
+    coordinate_1 = net.convertXY2LonLat(*net.getBBoxXY()[0])
+    coordinate_2 = net.convertXY2LonLat(*net.getBBoxXY()[1])
+
+    return (coordinate_1[1], coordinate_1[0]), (coordinate_2[1], coordinate_2[0])
+
+
+def get_network(network_file_path):
+    """Loads and returns the network object from the passed file path."""
+
+    return sumolib.net.readNet(network_file_path)
+
+
+def get_config_file_path(data_directory):
+    """Returns the file path to the SUMO configuration file."""
+
+    return os.path.join(data_directory, 'osm.sumocfg')
+
+
+def get_network_file_path(data_directory):
+    """Returns the file path to the file encoding the road network."""
+
+    return os.path.join(data_directory, 'osm.net.xml')
+
+
 def main():
-    """Runs a small sample network with false department locations for experimentation."""
+    """Runs a small sample network with theoretical department locations for experimentation."""
 
     data_directory = 'test_sim'
     station_coordinates = [(44.485567, -73.222804),
