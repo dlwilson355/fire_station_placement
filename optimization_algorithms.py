@@ -12,7 +12,8 @@ import random
 class OptimizationAlgorithm:
     """This is a template optimization object which the optimization algorithms inherit."""
 
-    def __init__(self, loss_function, num_stations, station_bounds):
+    def __init__(self, loss_function, num_stations, station_bounds, seed=0):
+        random.seed(seed)
         self.loss_function = loss_function
         self.num_stations = num_stations
         self.station_bounds = station_bounds
@@ -50,8 +51,8 @@ class CoverageGeometricAlgorithm(OptimizationAlgorithm):
 
 class HillClimberOptimizationAlgorithm(OptimizationAlgorithm):
 
-    def __init__(self, loss_function, num_stations, station_bounds, num_mutations, max_shift_proportion):
-        super().__init__(loss_function, num_stations, station_bounds)
+    def __init__(self, loss_function, num_stations, station_bounds, num_mutations, max_shift_proportion, seed=0):
+        super().__init__(loss_function, num_stations, station_bounds, seed)
         self.num_mutations = num_mutations
         self.max_shift_proportion = max_shift_proportion
 

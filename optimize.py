@@ -6,14 +6,6 @@ from optimization_algorithms import HillClimberOptimizationAlgorithm
 from sumo_interface import get_response_times, get_network_coordinate_bounds, get_network_file_path
 
 
-# def simulate():
-#     directory = "staten_island_south_west"
-#     station_coordinates = load_nyc_station_coordinates()
-#     response_times = get_response_times(directory, station_coordinates, gui=True)
-#     print(response_times)
-#     print(sum(response_times) / len(response_times))
-
-
 def average_response_loss(simulation_directory, station_placements, num_simulations=100):
     """This loss function returns the mean response time over a specified number of simulated emergencies."""
 
@@ -25,12 +17,12 @@ def average_response_loss(simulation_directory, station_placements, num_simulati
 
 def run_algorithm():
     directory = 'test_sim'
-    loss_function = lambda placements: average_response_loss(directory, placements, 10)
+    loss_function = lambda placements: average_response_loss(directory, placements, 3)
     bounds = get_network_coordinate_bounds(get_network_file_path(directory))
-    algorithm = HillClimberOptimizationAlgorithm(loss_function, 3, bounds, 1, 0.1)
+    algorithm = HillClimberOptimizationAlgorithm(loss_function, 3, bounds, 1, 0.1, seed=1)
 
     fitnesses = [algorithm.fitness]
-    for _ in range(4):
+    for _ in range(6):
         fitnesses.append(algorithm.update_placements())
 
     plt.plot(fitnesses)
