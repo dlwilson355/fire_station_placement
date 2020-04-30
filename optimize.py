@@ -3,29 +3,22 @@
 import matplotlib.pyplot as plt
 
 from optimization_algorithms import HillClimberOptimizationAlgorithm
-from sumo_interface import get_response_times, get_network_coordinate_bounds, get_network_file_path
-
-
-def average_response_loss(simulation_directory, station_placements, num_simulations=100):
-    """This loss function returns the mean response time over a specified number of simulated emergencies."""
-
-    response_times = get_response_times(simulation_directory, station_placements, num_simulations)
-    mean_response_time = sum(response_times) / len(response_times)
-
-    return mean_response_time
+from sumo_interface import get_network_coordinate_bounds, get_network_file_path
+from loss_functions import get_average_response_loss, \
+    get_median_response_loss, get_max_95_percentile_response_loss, get_max_loss
 
 
 def run_algorithm():
     directory = 'test_sim'
-    loss_function = lambda placements: average_response_loss(directory, placements, 3)
+    loss_function = get_max_loss(directory, 3)
     bounds = get_network_coordinate_bounds(get_network_file_path(directory))
-    algorithm = HillClimberOptimizationAlgorithm(loss_function, 3, bounds, 1, 0.1, seed=1)
+    algorithm = HillClimberOptimizationAlgorithm(loss_function, 3, bounds, 1, 0.1)
 
-    fitnesses = [algorithm.fitness]
+    fitness_values = [algorithm.fitness]
     for _ in range(6):
-        fitnesses.append(algorithm.update_placements())
+        fitness_values.append(algorithm.update_placements())
 
-    plt.plot(fitnesses)
+    plt.plot(fitness_values)
     plt.show()
 
 
