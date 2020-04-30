@@ -27,11 +27,11 @@ def run_algorithm():
     directory = 'test_sim'
     loss_function = lambda placements: average_response_loss(directory, placements, 10)
     bounds = get_network_coordinate_bounds(get_network_file_path(directory))
-    algorithm = HillClimberOptimizationAlgorithm(loss_function, 3, bounds)
+    algorithm = HillClimberOptimizationAlgorithm(loss_function, 3, bounds, 1, 0.1)
 
     fitnesses = [algorithm.fitness]
-    for _ in range(10):
-        fitnesses.append(algorithm.update())
+    for _ in range(4):
+        fitnesses.append(algorithm.update_placements())
 
     plt.plot(fitnesses)
     plt.show()

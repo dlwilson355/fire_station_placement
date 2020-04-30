@@ -1,5 +1,11 @@
 """This file contains the implementation of the optimization algorithms."""
 
+"""
+Ideas: use force based algorithm (like for graphs with nodes)
+Use goemetric optimization
+Use coverage optimization
+"""
+
 import random
 
 
@@ -12,12 +18,12 @@ class OptimizationAlgorithm:
         self.station_bounds = station_bounds
         self.fitness = 0
         self.station_placements = []
-        self.initialize()
+        self.initialize_placements()
 
-    def initialize(self):
+    def initialize_placements(self):
         raise NotImplementedError("Implement this function in the optimization algorithm.")
 
-    def update(self):
+    def update_placements(self):
         raise NotImplementedError("Implement this function in the optimization algorithm.")
 
     def get_loss(self):
@@ -44,7 +50,12 @@ class CoverageGeometricAlgorithm(OptimizationAlgorithm):
 
 class HillClimberOptimizationAlgorithm(OptimizationAlgorithm):
 
-    def initialize(self):
+    def __init__(self, loss_function, num_stations, station_bounds, num_mutations, max_shift_proportion):
+        super().__init__(loss_function, num_stations, station_bounds)
+        self.num_mutations = num_mutations
+        self.max_shift_proportion = max_shift_proportion
+
+    def initialize_placements(self):
         """This function makes initial station placements and computes initial fitness."""
 
         # place the stations randomly
@@ -54,23 +65,26 @@ class HillClimberOptimizationAlgorithm(OptimizationAlgorithm):
         # find the fitness
         self.fitness = self.get_loss()
 
-    def get_mutated_placements(self, max_shift_proportion=0.1):
+    def get_mutated_placements(self):
+        """Returns a list of station placements that are mutated from the current placements."""
 
         # determine how far each station can move
-        max_lat_shift = (self.station_bounds[1][0] - self.station_bounds[0][0]) * max_shift_proportion
-        max_lon_shift = (self.station_bounds[1][1] - self.station_bounds[0][1]) * max_shift_proportion
+        max_lat_shift = (self.station_bounds[1][0] - self.station_bounds[0][0]) * self.max_shift_proportion
+        max_lon_shift = (self.station_bounds[1][1] - self.station_bounds[0][1]) * self.max_shift_proportion
 
-        # construct a list of mutated station placements
-        mutated_station_placements = []
-        for placement in self.station_placements:
+        # mutate the list of station placements
+        mutated_station_placements = [station for station in self.station_placements]
+        for _ in range(self.num_mutations):
+            index = random.randint(0, len(self.station_placements)-1)
+            placement = self.station_placements[index]
             lat_shift = random.uniform(0, max_lat_shift)
             lon_shift = random.uniform(0, max_lon_shift)
             new_placement = (placement[0] + lat_shift, placement[1] + lon_shift)
-            mutated_station_placements.append(new_placement)
+            mutated_station_placements[index] = new_placement
 
         return mutated_station_placements
 
-    def update(self):
+    def update_placements(self):
         """
         Calling this function runs the next iteration of the hill climber optimization algorithm.
         Returns the improvement in fitness over the previous iteration (if any).
@@ -80,15 +94,18 @@ class HillClimberOptimizationAlgorithm(OptimizationAlgorithm):
         new_placements = self.get_mutated_placements()
         new_fitness = self.loss_function(new_placements)
 
-        # replace the current station coordinates if the new ones have greater fitness
-        fitness_improvement = self.fitness - new_fitness if self.fitness > new_fitness else 0
-        if fitness_improvement > 0:
+        # if fitness has improved, replace the current solution with the new one
+        if self.fitness > new_fitness:
             self.station_placements = new_placements
             self.fitness = new_fitness
 
-        return fitness_improvement
+        return self.fitness
 
 
 class EvolutionaryOptimizationAlgorithm(OptimizationAlgorithm):
 
-    pass
+    def __init__(self, loss_function, num_stations, station_bounds, pop_size, num_mutations, max_shift_proportion):
+        super().__init__(loss_function, num_stations, station_bounds)
+        self.pop_size = pop_size
+        self.num_mutations = num_mutations
+        self.max_shift_proportion = max_shift_proportion
