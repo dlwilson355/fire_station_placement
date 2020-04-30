@@ -4,7 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from sumo_interface import get_response_times
-from exploratory_data_analysis import compute_summary_statistics, get_ECDF_values, load_nyc_response_time_dataset
+from exploratory_data_analysis import compute_summary_statistics, get_ECDF_values, load_nyc_response_time_dataset, \
+    create_output_directory
 
 
 def load_nyc_station_coordinates():
@@ -34,7 +35,9 @@ def analyze_relationship(real_response_times, simulated_response_times):
     times.
     """
 
-    # construct and ECDF
+    create_output_directory()
+
+    # construct an ECDF
     plt.style.use('Solarize_Light2')
     font = {'weight': 'bold', 'size': 22}
     plt.rc('font', **font)

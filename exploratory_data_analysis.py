@@ -9,6 +9,11 @@ import matplotlib.pyplot as plt
 from scipy import stats
 
 
+def create_output_directory():
+    if not os.path.exists("plots"):
+        os.mkdir("plots")
+
+
 def get_seconds(s):
     """This function returns the number of seconds from the string."""
 
@@ -81,8 +86,9 @@ def analyze_response_times():
     3.) Save ECDFs.
     """
 
-    # load the data
+    # prepare for analysis
     data = load_nyc_response_time_dataset()
+    create_output_directory()
 
     # set up the plotting parameters
     plt.style.use('Solarize_Light2')
