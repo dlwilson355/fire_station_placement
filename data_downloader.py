@@ -15,4 +15,4 @@ output = 'sumo_data.zip'
 # gdown.cached_download(url, output, md5=md5, postprocess=gdown.extractall)
 gdown.cached_download(url, output, postprocess=gdown.extractall)
 os.remove(output)
-#TODO clean code, add checksums, rename downloaded file using file_paths
+#TODO clean code, add checksums, rename downloaded file using file_paths, add downloads for all data sources
