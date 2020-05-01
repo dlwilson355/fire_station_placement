@@ -5,7 +5,6 @@ import sys
 import random
 
 import pyproj
-
 # these imports are required for SUMO
 if 'SUMO_HOME' in os.environ:
     sumo_tools_directory = os.path.join(os.environ['SUMO_HOME'], 'tools')
@@ -14,6 +13,8 @@ else:
     raise ModuleNotFoundError("Install SUMO and the environmental variable 'SUMO_HOME' will be automatically set.")
 import traci
 import sumolib
+
+from file_paths import get_simulation_data_file_path
 
 
 def get_response_times(data_directory,
@@ -194,7 +195,7 @@ def get_network_file_path(data_directory):
 def main():
     """Runs a small sample network with theoretical department locations for experimentation."""
 
-    data_directory = 'test_sim'
+    data_directory = get_simulation_data_file_path('test_sim')
     station_coordinates = [(44.485567, -73.222804),
                            (44.476561, -73.210535),
                            (44.466561, -73.210535),
@@ -202,9 +203,7 @@ def main():
                            (44.476, -73.205)]
 
     response_times = get_response_times(data_directory, station_coordinates)
-    mean_response_time = sum(response_times) / len(response_times)
-
-    print(f"Mean response time was: {mean_response_time} seconds.")
+    print(f"Response times were: {response_times} seconds.")
 
 
 if __name__ == "__main__":

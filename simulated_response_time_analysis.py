@@ -3,9 +3,9 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from file_paths import get_output_file_path, get_simulation_data_file_path, create_output_directory
 from sumo_interface import get_response_times
-from exploratory_data_analysis import compute_summary_statistics, get_ECDF_values, load_nyc_response_time_dataset, \
-    create_output_directory
+from exploratory_data_analysis import compute_summary_statistics, get_ECDF_values, load_nyc_response_time_dataset
 
 
 def load_nyc_station_coordinates():
@@ -19,14 +19,6 @@ def load_nyc_station_coordinates():
         station_coordinates.append((latitude, longitude))
 
     return station_coordinates
-
-
-def get_simulated_response_times(num_simulations=10):
-    directory = "staten_island_south_west"
-    station_coordinates = load_nyc_station_coordinates()
-    simulated_response_times = get_response_times(directory, station_coordinates, num_simulations)
-
-    return simulated_response_times
 
 
 def analyze_relationship(real_response_times, simulated_response_times):
@@ -47,16 +39,17 @@ def analyze_relationship(real_response_times, simulated_response_times):
     plt.ylabel("Pr < X")
     plt.title("Real vs Simulated Response Times")
     plt.legend(["Real", "Simulated"])
-    plt.savefig(os.path.join("plots", "real_vs_simulated_response_times_ecdf.png"))
+    plt.savefig(get_output_file_path("real_vs_simulated_response_times_ecdf.png"))
 
     # compute summary statistics
     data_dict = {"Real": real_response_times, "Simulated": simulated_response_times}
-    compute_summary_statistics(data_dict, os.path.join("plots", "real_vs_simulated_response_times.txt"))
+    compute_summary_statistics(data_dict, get_output_file_path("real_vs_simulated_response_times.txt"))
 
 
 def main():
     real_response_times = list(load_nyc_response_time_dataset()["AVERAGERESPONSETIME"])
-    simulated_response_times = get_response_times("staten_island_south_west", load_nyc_station_coordinates(), 5)
+    simulated_response_times = get_response_times(get_simulation_data_file_path("staten_island_south_west"),
+                                                  load_nyc_station_coordinates(), 5)
     analyze_relationship(real_response_times, simulated_response_times)
 
 

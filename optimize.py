@@ -4,12 +4,13 @@ import matplotlib.pyplot as plt
 
 from optimization_algorithms import HillClimberOptimizationAlgorithm
 from sumo_interface import get_network_coordinate_bounds, get_network_file_path
+from file_paths import get_simulation_data_file_path
 from loss_functions import get_average_response_loss, \
     get_median_response_loss, get_max_95_percentile_response_loss, get_max_loss
 
 
 def run_algorithm():
-    directory = 'test_sim'
+    directory = get_simulation_data_file_path('test_sim')
     loss_function = get_max_loss(directory, 3)
     bounds = get_network_coordinate_bounds(get_network_file_path(directory))
     algorithm = HillClimberOptimizationAlgorithm(loss_function, 3, bounds, 1, 0.1)

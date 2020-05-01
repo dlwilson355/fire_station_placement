@@ -8,10 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import stats
 
-
-def create_output_directory():
-    if not os.path.exists("plots"):
-        os.mkdir("plots")
+from file_paths import get_output_file_path, create_output_directory
 
 
 def get_seconds(s):
@@ -86,11 +83,9 @@ def analyze_response_times():
     3.) Save ECDFs.
     """
 
-    # prepare for analysis
-    data = load_nyc_response_time_dataset()
+    # load data and set plot parameters
     create_output_directory()
-
-    # set up the plotting parameters
+    data = load_nyc_response_time_dataset()
     plt.style.use('Solarize_Light2')
     font = {'weight': 'bold', 'size': 22}
     plt.rc('font', **font)
@@ -99,12 +94,12 @@ def analyze_response_times():
     response_times = data["AVERAGERESPONSETIME"]
     fig, ax = plt.subplots(figsize=(15, 8))
     add_histogram(ax, response_times, "Response Times in New York City")
-    plt.savefig(os.path.join("plots", "response_times_hist.png"))
+    plt.savefig(os.path.join(get_output_file_path("response_times_hist.png")))
 
     # construct an EDCF of citywide response times
     fig, ax = plt.subplots(figsize=(15, 8))
     add_ECDF(ax, response_times, "Response Times in New York City")
-    plt.savefig(os.path.join("plots", "response_times_ECDF.png"))
+    plt.savefig(os.path.join(get_output_file_path("response_times_ECDF.png")))
 
     # analyze the response time for each borough
     borough_response_times = {borough: data.loc[data["INCIDENTBOROUGH"] == borough]["AVERAGERESPONSETIME"]
@@ -113,8 +108,8 @@ def analyze_response_times():
     for ax, name, values in zip(axs.reshape(-1), *zip(*borough_response_times.items())):
         add_ECDF(ax, values, name)
     fig.suptitle("Fire Fighter Response Based on Borough")
-    plt.savefig(os.path.join("plots", "borough_response_times_ECDF.png"))
-    compute_summary_statistics(borough_response_times, os.path.join("plots", "borough_response_times.txt"))
+    plt.savefig(os.path.join(get_output_file_path("borough_response_times_ECDF.png")))
+    compute_summary_statistics(borough_response_times, os.path.join(get_output_file_path("borough_response_times.txt")))
 
     # analyze the response times to different types of incidents
     incident_response_times = {borough: data.loc[data["INCIDENTCLASSIFICATION"] == borough]["AVERAGERESPONSETIME"]
@@ -122,8 +117,9 @@ def analyze_response_times():
     fig, axs = plt.subplots(3, 3, figsize=(40, 30))
     for ax, name, values in zip(axs.reshape(-1), *zip(*incident_response_times.items())):
         add_ECDF(ax, values, name)
-    plt.savefig(os.path.join("plots", "incident_response_times_ECDF.png"))
-    compute_summary_statistics(incident_response_times,  os.path.join("plots", "incident_response_times.txt"))
+    plt.savefig(os.path.join(get_output_file_path("incident_response_times_ECDF.png")))
+    compute_summary_statistics(incident_response_times,
+                               os.path.join(get_output_file_path("incident_response_times.txt")))
 
 
 def main():
