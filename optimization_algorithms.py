@@ -12,7 +12,12 @@ import random
 class OptimizationAlgorithm:
     """This is a template optimization object which the optimization algorithms inherit."""
 
-    def __init__(self, loss_function, num_stations, station_bounds, seed=None):
+    def __init__(self,
+                 loss_function,
+                 num_stations,
+                 station_bounds,
+                 seed=None):
+
         if seed:
             random.seed(seed)
         self.loss_function = loss_function
@@ -41,18 +46,28 @@ class OptimizationAlgorithm:
 
 
 class DistanceGeometricAlgorithm(OptimizationAlgorithm):
+    """This class implements the distance based optimization algorithm."""
 
     pass
 
 
 class CoverageGeometricAlgorithm(OptimizationAlgorithm):
+    """This class implements the coverage oriented optimization algorithm."""
 
     pass
 
 
 class HillClimberOptimizationAlgorithm(OptimizationAlgorithm):
+    """This class implements the hill climber optimization algorithm."""
 
-    def __init__(self, loss_function, num_stations, station_bounds, num_mutations, max_shift_proportion, seed=None):
+    def __init__(self,
+                 loss_function,
+                 num_stations,
+                 station_bounds,
+                 num_mutations=1,
+                 max_shift_proportion=0.1,
+                 seed=None):
+
         super().__init__(loss_function, num_stations, station_bounds, seed)
         self.num_mutations = num_mutations
         self.max_shift_proportion = max_shift_proportion
@@ -79,8 +94,8 @@ class HillClimberOptimizationAlgorithm(OptimizationAlgorithm):
         for _ in range(self.num_mutations):
             index = random.randint(0, len(self.station_placements)-1)
             placement = self.station_placements[index]
-            lat_shift = random.uniform(0, max_lat_shift)
-            lon_shift = random.uniform(0, max_lon_shift)
+            lat_shift = random.uniform(-max_lat_shift, max_lat_shift)
+            lon_shift = random.uniform(-max_lon_shift, max_lon_shift)
             new_placement = (placement[0] + lat_shift, placement[1] + lon_shift)
             mutated_station_placements[index] = new_placement
 
@@ -105,6 +120,7 @@ class HillClimberOptimizationAlgorithm(OptimizationAlgorithm):
 
 
 class EvolutionaryOptimizationAlgorithm(OptimizationAlgorithm):
+    """This class implements the genetic optimization algorithm."""
 
     def __init__(self, loss_function, num_stations, station_bounds, pop_size, num_mutations, max_shift_proportion):
         super().__init__(loss_function, num_stations, station_bounds)
