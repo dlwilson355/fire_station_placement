@@ -9,15 +9,15 @@ import numpy as np
 from sumo_interface import get_response_times
 
 
-def get_average_response_loss(simulation_directory, num_simulations=100):
+def get_mean_response_loss(simulation_directory, num_simulations=100):
     """Returns a loss function that computes the mean response time over a specified number of simulated emergencies."""
 
-    def average_response_loss(placements):
+    def mean_response_loss(placements):
         response_times = get_response_times(simulation_directory, placements, num_simulations)
         mean_response_time = sum(response_times) / len(response_times)
         return mean_response_time
 
-    return average_response_loss
+    return mean_response_loss
 
 
 def get_median_response_loss(simulation_directory, num_simulations=100):
