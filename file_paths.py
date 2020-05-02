@@ -16,8 +16,8 @@ def get_output_file_path(file_name):
     return os.path.join(OUTPUT_DIRECTORY, file_name)
 
 
-def get_police_data_directory():
-    return POLICE_DATA_DIRECTORY
+def get_police_data_file_path(file_name):
+    return os.path.join(POLICE_DATA_DIRECTORY, file_name)
 
 
 def get_simulation_data_file_path(sim_name):

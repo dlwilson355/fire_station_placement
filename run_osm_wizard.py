@@ -1,6 +1,6 @@
 """
 This file starts the OSM wizard.
-The wizard can be used to create a data set.
+The wizard can be used to create a data set with which to run traffic simulations in SUMO.
 """
 
 import os

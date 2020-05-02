@@ -1,9 +1,10 @@
-import os
+"""This file contains code for measuring simulated response times and comparing them to actual response times."""
 
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from file_paths import get_output_file_path, get_simulation_data_file_path, create_output_directory
+from file_paths import get_police_data_file_path, get_simulation_data_file_path, \
+    get_output_file_path, create_output_directory
 from sumo_interface import get_response_times
 from exploratory_data_analysis import compute_summary_statistics, get_ECDF_values, load_nyc_response_time_dataset
 
@@ -11,7 +12,7 @@ from exploratory_data_analysis import compute_summary_statistics, get_ECDF_value
 def load_nyc_station_coordinates():
     """This function returns the coordinates of the New York fire stations as a list of (lat, lon) tuples."""
 
-    stations = pd.read_csv(os.path.join("data", "FDNY_Firehouse_Listing.csv"))
+    stations = pd.read_csv(get_police_data_file_path("FDNY_Firehouse_Listing.csv"))
     station_coordinates = []
     for i in range(stations.shape[0]):
         latitude = stations['Latitude'].iloc[i]
