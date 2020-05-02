@@ -17,7 +17,7 @@ def construct_fitness_plot(fitness_values, parameters, loss_function_names, titl
 
     for ax, loss_fitness, loss_function_name in zip(axs.reshape(-1), fitness_values, loss_function_names):
         for fitness_scores in loss_fitness:
-            ax.plot(fitness_scores)
+            ax.plot(fitness_scores, linewidth=4)
         ax.tick_params(labelsize=22)
         ax.set_xlabel("Generation", fontsize=30)
         ax.set_ylabel("Fitness", fontsize=30)
@@ -54,19 +54,19 @@ def run_experiment():
     directory = get_simulation_data_file_path('test_sim')
     station_bounds = get_network_coordinate_bounds(get_network_file_path(directory))
     num_stations = 3
-    num_simulations = 2
+    num_simulations = 5
     loss_functions = [get_mean_response_loss(directory, num_simulations),
                       get_median_response_loss(directory, num_simulations),
                       get_max_95_percentile_response_loss(directory, num_simulations),
                       get_max_loss(directory, num_simulations)]
-    loss_functions = [get_mean_response_loss(directory, num_simulations)]
+    # loss_functions = [get_mean_response_loss(directory, num_simulations)]
     loss_function_names = ["Mean Response Time",
                            "Median Response Time",
                            "Max 95th Percentile Response Time",
                            "Max Response Time"]
     algorithm_name = "Hill Climber Optimization"
     mutation_distances = [0.001, 0.01, 0.1, 1]
-    mutation_distances = [0.01]
+    # mutation_distances = [0.01]
 
     all_fitness_values = []  # a list of lists of each fitness from each loss function
     for loss_function in loss_functions:
@@ -78,7 +78,7 @@ def run_experiment():
                                                          1,
                                                          mutation_distance,
                                                          seed=0)
-            loss_fitness_values.append(run_algorithm(algorithm, num_generations=1))
+            loss_fitness_values.append(run_algorithm(algorithm, num_generations=10))
         all_fitness_values.append(loss_fitness_values)
 
     construct_fitness_plot(all_fitness_values,

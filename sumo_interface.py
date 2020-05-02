@@ -3,6 +3,7 @@
 import os
 import sys
 import random
+import warnings
 
 import pyproj
 # these imports are required for SUMO
@@ -132,10 +133,11 @@ def get_edge_id_from_gps(network_file_path, coordinate, search_radius=1000):
         if edge[0].allows("emergency"):
             return edge[0].getID()
 
-    raise ValueError(f"Found no edges within search radius {search_radius} of coordinate {coordinate} that support "
-                     f"emergency vehicles."
-                     f"\nCheck to make sure your coordinates are reasonable "
-                     f"and consider increasing the search radius.")
+    # if no valid edge found raise a warning and return a random edge
+    warnings.warn(f"Found no edges within search radius {search_radius} of coordinate {coordinate} that support "
+                  f"emergency vehicles."
+                  f"\nCheck to make sure your coordinates are reasonable and consider increasing the search radius.")
+    return get_emergency(network_file_path)[0]
 
 
 def get_distance(coordinates_1, coordinates_2):
