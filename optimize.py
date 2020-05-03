@@ -2,7 +2,8 @@
 
 import matplotlib.pyplot as plt
 
-from optimization_algorithms import HillClimberOptimizationAlgorithm
+from optimization_algorithms import DistanceGeometricAlgorithm, CoverageGeometricAlgorithm, \
+    HillClimberOptimizationAlgorithm, EvolutionaryOptimizationAlgorithm
 from sumo_interface import get_network_coordinate_bounds, get_network_file_path
 from file_paths import get_simulation_data_file_path, get_output_file_path, create_output_directory
 from loss_functions import get_mean_response_loss, \
@@ -38,54 +39,98 @@ def run_algorithm(algorithm, num_generations=10):
     return fitness_values
 
 
-def run_algorithm_experiments(algorithm, parameters):
+def run_algorithm_experiments(algorithm_class,
+                              experimental_parameter_name,
+                              experimental_parameter_values,
+                              algorithm_name="Optimization Algorithm",
+                              num_simulations=5,
+                              num_stations=3,
+                              num_generations=10):
     """Runs a series of experiments on the algorithm with each of the parameters and plots the results."""
-
-    pass
-
-
-def run_experiment():
-    """
-    Runs an the optimization algorithm for different parameter values,
-    records the fitness values,
-    and plots the results.
-    """
 
     directory = get_simulation_data_file_path('test_sim')
     station_bounds = get_network_coordinate_bounds(get_network_file_path(directory))
-    num_stations = 3
-    num_simulations = 5
     loss_functions = [get_mean_response_loss(directory, num_simulations),
                       get_median_response_loss(directory, num_simulations),
                       get_max_95_percentile_response_loss(directory, num_simulations),
                       get_max_loss(directory, num_simulations)]
-    # loss_functions = [get_mean_response_loss(directory, num_simulations)]
     loss_function_names = ["Mean Response Time",
                            "Median Response Time",
                            "Max 95th Percentile Response Time",
                            "Max Response Time"]
-    algorithm_name = "Hill Climber Optimization"
-    mutation_distances = [0.001, 0.01, 0.1, 1]
-    # mutation_distances = [0.01]
 
     all_fitness_values = []  # a list of lists of each fitness from each loss function
     for loss_function in loss_functions:
         loss_fitness_values = []  # a list of fitness scores from the particular loss function
-        for mutation_distance in mutation_distances:
-            algorithm = HillClimberOptimizationAlgorithm(loss_function,
-                                                         num_stations,
-                                                         station_bounds,
-                                                         1,
-                                                         mutation_distance,
-                                                         seed=0)
-            loss_fitness_values.append(run_algorithm(algorithm, num_generations=10))
+        for parameter_value in experimental_parameter_values:
+            arg_dict = {experimental_parameter_name: parameter_value}
+            algorithm = algorithm_class(loss_function=loss_function,
+                                        station_bounds=station_bounds,
+                                        num_stations=num_stations,
+                                        seed=0,
+                                        **arg_dict)
+            loss_fitness_values.append(run_algorithm(algorithm, num_generations))
         all_fitness_values.append(loss_fitness_values)
 
-    construct_fitness_plot(all_fitness_values,
-                           mutation_distances,
-                           loss_function_names,
-                           algorithm_name)
+    construct_fitness_plot(all_fitness_values, experimental_parameter_values, loss_function_names, algorithm_name)
+
+
+# def run_experiment():
+#     """
+#     Runs an the optimization algorithm for different parameter values,
+#     records the fitness values,
+#     and plots the results.
+#     """
+#
+#     directory = get_simulation_data_file_path('test_sim')
+#     station_bounds = get_network_coordinate_bounds(get_network_file_path(directory))
+#     num_stations = 3
+#     num_simulations = 5
+#     loss_functions = [get_mean_response_loss(directory, num_simulations),
+#                       get_median_response_loss(directory, num_simulations),
+#                       get_max_95_percentile_response_loss(directory, num_simulations),
+#                       get_max_loss(directory, num_simulations)]
+#     # loss_functions = [get_mean_response_loss(directory, num_simulations)]
+#     loss_function_names = ["Mean Response Time",
+#                            "Median Response Time",
+#                            "Max 95th Percentile Response Time",
+#                            "Max Response Time"]
+#     algorithm_name = "Hill Climber Optimization"
+#     mutation_distances = [0.001, 0.01, 0.1, 1]
+#     # mutation_distances = [0.01]
+#
+#     all_fitness_values = []  # a list of lists of each fitness from each loss function
+#     for loss_function in loss_functions:
+#         loss_fitness_values = []  # a list of fitness scores from the particular loss function
+#         for mutation_distance in mutation_distances:
+#             algorithm = HillClimberOptimizationAlgorithm(loss_function,
+#                                                          num_stations,
+#                                                          station_bounds,
+#                                                          1,
+#                                                          mutation_distance,
+#                                                          seed=0)
+#             loss_fitness_values.append(run_algorithm(algorithm, num_generations=10))
+#         all_fitness_values.append(loss_fitness_values)
+#
+#     construct_fitness_plot(all_fitness_values,
+#                            mutation_distances,
+#                            loss_function_names,
+#                            algorithm_name)
+
+
+def run_all_experiments():
+
+    # experiment with different mutation rates for the hill climber algorithm
+    # algorithm_type = HillClimberOptimizationAlgorithm
+    # values = [0.001, 0.01, 0.1, 1]
+    # run_algorithm_experiments(algorithm_type, "max_shift_proportion", values, "Hill Climber Optimization", 1, 1, 1)
+
+    directory = get_simulation_data_file_path('test_sim')
+    station_bounds = get_network_coordinate_bounds(get_network_file_path(directory))
+    loss_function = get_mean_response_loss(directory, 1)
+    test = EvolutionaryOptimizationAlgorithm(loss_function, 3, station_bounds)
 
 
 if __name__ == "__main__":
-    run_experiment()
+    # run_experiment()
+    run_all_experiments()

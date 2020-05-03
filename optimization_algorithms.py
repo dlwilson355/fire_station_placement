@@ -62,8 +62,8 @@ class HillClimberOptimizationAlgorithm(OptimizationAlgorithm):
 
     def __init__(self,
                  loss_function,
-                 num_stations,
                  station_bounds,
+                 num_stations=3,
                  num_mutations=1,
                  max_shift_proportion=0.1,
                  seed=None):
@@ -122,8 +122,16 @@ class HillClimberOptimizationAlgorithm(OptimizationAlgorithm):
 class EvolutionaryOptimizationAlgorithm(OptimizationAlgorithm):
     """This class implements the genetic optimization algorithm."""
 
-    def __init__(self, loss_function, num_stations, station_bounds, pop_size, num_mutations, max_shift_proportion):
-        super().__init__(loss_function, num_stations, station_bounds)
-        self.pop_size = pop_size
+    def __init__(self,
+                 loss_function,
+                 station_bounds,
+                 num_stations=3,
+                 num_mutations=1,
+                 max_shift_proportion=0.1,
+                 seed=None):
+
+        super().__init__(loss_function, num_stations, station_bounds, seed)
         self.num_mutations = num_mutations
         self.max_shift_proportion = max_shift_proportion
+
+    def 
