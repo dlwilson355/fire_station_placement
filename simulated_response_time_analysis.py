@@ -31,15 +31,14 @@ def analyze_relationship(real_response_times, simulated_response_times):
     create_output_directory()
 
     # construct an ECDF
+    fig, _ = plt.subplots(figsize=(15, 8))
     plt.style.use('Solarize_Light2')
-    font = {'weight': 'bold', 'size': 22}
-    plt.rc('font', **font)
     plt.plot(*get_ECDF_values(real_response_times))
     plt.plot(*get_ECDF_values(simulated_response_times), '--')
-    plt.xlabel("Response Time (s)")
-    plt.ylabel("Pr < X")
-    plt.title("Real vs Simulated Response Times")
-    plt.legend(["Real", "Simulated"])
+    plt.xlabel("Response Time (s)", fontsize=22)
+    plt.ylabel("Pr < X", fontsize=22)
+    plt.title("Real vs Simulated Response Times", fontsize=30)
+    plt.legend(["Real", "Simulated"], fontsize=22)
     plt.savefig(get_output_file_path("real_vs_simulated_response_times_ecdf.png"))
 
     # compute summary statistics
@@ -50,7 +49,7 @@ def analyze_relationship(real_response_times, simulated_response_times):
 def main():
     real_response_times = list(load_nyc_response_time_dataset()["AVERAGERESPONSETIME"])
     simulated_response_times = get_response_times(get_simulation_data_file_path("staten_island_south_west"),
-                                                  load_nyc_station_coordinates(), 5)
+                                                  load_nyc_station_coordinates(), 500)
     analyze_relationship(real_response_times, simulated_response_times)
 
 

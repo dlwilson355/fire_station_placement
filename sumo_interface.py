@@ -22,7 +22,9 @@ def get_response_times(data_directory,
                        station_coordinates,
                        num_simulations=10,
                        gui=False,
-                       auto_start_close=False):
+                       auto_start_close=False,
+                       prior_time=400,
+                       max_time=5000):
     """This function will run multiple simulations in SUMO and return the resulting response times."""
 
     response_times = []
@@ -31,7 +33,10 @@ def get_response_times(data_directory,
 
     for _ in range(num_simulations):
         start_simulation(config_file_path, gui, auto_start_close)
-        response_times.append(respond_to_emergency(net_file_path, station_coordinates))
+        response_times.append(respond_to_emergency(net_file_path,
+                                                   station_coordinates,
+                                                   prior_time=prior_time,
+                                                   max_time=max_time))
         close_simulation()
 
     return response_times
@@ -52,12 +57,13 @@ def start_simulation(config_file_path, gui=False, auto_start_close=True):
     if auto_start_close:
         sumo_command.append('--start')
         sumo_command.append('--quit-on-end')
+    sumo_command.append('--no-warnings')
 
     # call the command to start the simulation
     traci.start(sumo_command)
 
 
-def respond_to_emergency(net_file_path, station_coordinates, prior_time=400):
+def respond_to_emergency(net_file_path, station_coordinates, prior_time=400, max_time=5000):
     """
     This function creates an emergency, finds the nearest station, and sends the emergency vehicle.
     It returns the amount of time (in seconds) it takes for the emergency vehicle to arrive on scene.
@@ -69,7 +75,7 @@ def respond_to_emergency(net_file_path, station_coordinates, prior_time=400):
     station_edge = get_edge_id_from_gps(net_file_path, station_coordinate)
 
     # run the simulation a little to allow traffic to flow
-    while traci.simulation.getTime() < prior_time:
+    while traci.simulation.getTime() < prior_time and traci.simulation.getTime() < max_time:
         traci.simulationStep()
 
     # create the emergency vehicle and send it from the source to the destination
