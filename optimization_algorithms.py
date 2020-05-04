@@ -44,38 +44,6 @@ class OptimizationAlgorithm:
         return latitude, longitude
 
 
-class DistanceGeometricAlgorithm(OptimizationAlgorithm):
-    """This class implements the distance based optimization algorithm."""
-
-    pass
-
-
-class CoverageGeometricAlgorithm(OptimizationAlgorithm):
-    """This class implements the coverage oriented optimization algorithm."""
-
-    def __init__(self,
-                 loss_function,
-                 num_stations,
-                 station_bounds,
-                 distance_falloff=0.1,
-                 grid_size=100,
-                 seed=None):
-
-        self.distance_falloff = distance_falloff
-        self.grid_size = grid_size
-        super().__init__(loss_function, num_stations, station_bounds, seed)
-
-    def get_grid(self):
-        """Returns a grid which is used to assess coverage."""
-
-        grid = np.zeros((self.grid_size, self.grid_size))
-
-
-    def convert_gps_to_grid_coordinates(self):
-        pass
-
-
-
 class HillClimberOptimizationAlgorithm(OptimizationAlgorithm):
     """This class implements the hill climber optimization algorithm."""
 

@@ -2,8 +2,7 @@
 
 import matplotlib.pyplot as plt
 
-from optimization_algorithms import DistanceGeometricAlgorithm, CoverageGeometricAlgorithm, \
-    HillClimberOptimizationAlgorithm, EvolutionaryOptimizationAlgorithm
+from optimization_algorithms import HillClimberOptimizationAlgorithm, EvolutionaryOptimizationAlgorithm
 from sumo_interface import get_network_coordinate_bounds, get_network_file_path
 from file_paths import get_simulation_data_file_path, get_output_file_path, create_output_directory
 from loss_functions import get_mean_response_loss, \
@@ -81,22 +80,23 @@ def run_all_experiments():
     # experiment with different mutation rates for the hill climber algorithm
     algorithm_type = HillClimberOptimizationAlgorithm
     values = [0.001, 0.01, 0.1, 1]
-    run_algorithm_experiments(algorithm_type, "max_shift_proportion", values, "Hill Climber Optimization", num_stations=6, sim_name='staten_island')
+    run_algorithm_experiments(algorithm_type,
+                              "max_shift_proportion",
+                              values,
+                              "Hill Climber Optimization",
+                              num_stations=6,
+                              sim_name='staten_island_east')
 
     # experiment with different mutation rates for the hill climber algorithm
     algorithm_type = EvolutionaryOptimizationAlgorithm
     values = [3, 5, 7]
-    run_algorithm_experiments(algorithm_type, "pop_size", values, "Evolutionary Algorithm Optimization", num_stations=6, sim_name='staten_island')
-
-    # directory = get_simulation_data_file_path('test_sim')
-    # station_bounds = get_network_coordinate_bounds(get_network_file_path(directory))
-    # loss_function = get_mean_response_loss(directory, 1)
-    # test = CoverageGeometricAlgorithm(loss_function, station_bounds, num_stations=3, pop_size=3, num_survivors=2)
-    # print(test.fitness)
-    # for i in range(3):
-    #     test.update_placements()
+    run_algorithm_experiments(algorithm_type,
+                              "pop_size",
+                              values,
+                              "Evolutionary Algorithm Optimization",
+                              num_stations=6,
+                              sim_name='staten_island_east')
 
 
 if __name__ == "__main__":
-    # run_experiment()
     run_all_experiments()
