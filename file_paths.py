@@ -45,9 +45,5 @@ def import_sumo_tools():
     sys.path.append(sumo_tools_directory)
 
 
-def get_sumo_executable():
-    pass
-
-
 def get_sumo_tools_directory():
     return os.path.join(get_sumo_directory(), 'tools')
