@@ -210,7 +210,7 @@ def main():
                            (44.478, -73.213),
                            (44.476, -73.205)]
 
-    response_times = get_response_times(data_directory, station_coordinates)
+    response_times = get_response_times(data_directory, station_coordinates, gui=True)
     print(f"Response times were: {response_times} seconds.")
 
 
